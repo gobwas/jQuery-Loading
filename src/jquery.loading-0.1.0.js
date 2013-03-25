@@ -50,8 +50,8 @@
 				src:    'content/images/loading4.gif'
 			},
 			spinnerDOM: {
-				width:   100,
-				height:  100,
+				width:   17,
+				height:  17,
 				matrix: {
 					columns: null,
 					rows:    null
@@ -66,7 +66,7 @@
 						left:   0
 					}
 				},
-				interval: 10,
+				interval: 50,
 				effects: {
 					rows:    null,
 					columns: null,
@@ -201,7 +201,7 @@
 					left:     (this._dimensions.width - config.width) /2,
 					top:      (this._dimensions.height - config.height) / 2,
 					width:    config.width,
-					height:   config.height,
+					height:   config.height
 				});
 
 				var clearfix = $('<div/>').css({clear: 'both'});
@@ -218,7 +218,7 @@
 								background: 'green',
 								height:     config.pin.height,
 								float:      'left',
-								opacity:    0,
+								opacity:    0
 								//display:    'none'
 							})
 							.data({
@@ -239,29 +239,90 @@
 
 		runInterval: (function() {
 
-			var intervalious = function(pins, interval, config) {
+
+            var snakeInterval = function(pins, options, step, position, sign, interval, circles, start)
+            {
+                step     || (step = {x: 0, y: 0});
+                position || (position = {x: 0, y: 0});
+                interval || (interval = 0);
+                circles  || (circles = 0);
+                start    || (start = {x: 0, y: 0});
+
+                position.x+= step.x;
+                position.y+= step.y;
+
+                if (position.x == start.x && position.y == start.y && circles != 0) {
+                    position.x++;
+                    position.y++;
+                    start.x++;
+                    start.y++;
+                    options.matrix.x--;
+                    options.matrix.y--;
+                }
+
+                if ((options.matrix.x - start.x) <= 0 || (options.matrix.y - start.y) <= 0) {
+                    position = {x: 0, y: 0};
+                    start = {x: 0, y: 0};
+                    options.matrix = JSON.parse(JSON.stringify({
+                        x: options._matrix.columns - 1,
+                        y: options._matrix.rows - 1
+                    }));
+                }
+
+                circles++;
+
+                /*setTimeout((function(pin){ return function() {
+                    effect(pin);
+                }})(pins[position.y][position.x]), interval);*/
+
+                effect(pins[position.y][position.x]);
+
+                interval+= options.interval;
+
+                var columns = options.matrix.x,
+                    rows    = options.matrix.y;
+
+                if (position.x == start.x && position.y == start.y) {
+                    sign = 1;
+                } else if (position.x == columns && position.y == rows) {
+                    sign = 0;
+                }
+
+                if (sign) {
+                    if (position.x < columns && position.y < rows)   step = {x: 1, y: 0};
+                    if (position.x == columns && position.y < rows)   step = {x: 0, y: 1};
+                } else {
+                    if (position.x > start.x && position.y > start.y) step = {x: -1, y: 0};
+                    if (position.x == start.x && position.y > start.y)   step = {x: 0, y: -1};
+                }
+
+                if (circles >= 6*(options._matrix.columns * options._matrix.rows)) return;
+                snakeInterval(pins, options, step, position, sign, interval, circles, start);
+            };
+
+			var intervalious = function(pins, options) {
 				var inter = 0;
 				for (var y in pins) {
 					for (var x in pins[y]) {
 						setTimeout((function(y,x){ return function() {
 							effect(pins[y][x]);
 						}})(y,x), inter);
-						inter+= interval;
+						inter+= options.interval;
 					}
 				}
 			};
 
 
-			var intervaliousRnd = function(pins, interval, config) {
+			var intervaliousRnd = function(pins, options) {
 				var	inter = 0,
 					z = 0;
 
-					while (z < config.matrix.rows * config.matrix.columns) {
+					while (z < options.matrix.rows * options.matrix.columns) {
 						setTimeout((function(y,x){ return function() {
 							effect(pins[y][x]);
-						}})(parseInt(Math.floor(Math.random() * (config.matrix.rows))),parseInt(Math.floor(Math.random() * (config.matrix.columns)))), inter);
+						}})(parseInt(Math.floor(Math.random() * (options.matrix.rows))),parseInt(Math.floor(Math.random() * (options.matrix.columns)))), inter);
 
-						inter+= interval;
+						inter+= options.interval;
 						z++;
 					}
 			};
@@ -272,20 +333,35 @@
 						//background: "#"+((1<<24)*Math.random()|0).toString(16)
 					})
 					.animate({
-						opacity: pin.data('sign') ? 1 : 0 // 0.3
-					}, parseInt((Math.random() * (1000-50) + 50)))
+						opacity: pin.data('sign') ? 1 : 0 //0.3
+					}, 0)//parseInt((Math.random() * (200-50) + 50)))
 					.data('sign', pin.data('sign') ? false : true);
+
+                /*pin.css({opacity: pin.data('sign') ? 1 : 0})
+                    .data('sign', pin.data('sign') ? false : true);*/
 			};
 
 			return function()
 			{
-				var	config = this.options.spinnerDOM,
-					pins   = this._pins,
-					interval = config.interval;
+                var options = {
+                    callbacks: {
+                        effect: effect
+                    },
+                    interval: this.options.spinnerDOM.interval,
+                    matrix:   JSON.parse(JSON.stringify({
+                        x: this.options.spinnerDOM.matrix.columns - 1,
+                        y: this.options.spinnerDOM.matrix.rows - 1
+                    })),
+                    _matrix: this.options.spinnerDOM.matrix
+                }
 
-				intervalious(pins, interval, config);
+                var pins = this._pins;
 
-				this._interval = setInterval(function() {intervalious(pins, interval, config);}, config.matrix.columns * config.matrix.rows * config.interval);
+//				intervalious(pins, options);
+                snakeInterval(pins, options);
+				/*this._interval = setInterval(function() {
+                    intervalious(pins, options);
+                }, options.matrix.columns * options.matrix.rows * options.interval);*/
 			}
 		})(),
 
