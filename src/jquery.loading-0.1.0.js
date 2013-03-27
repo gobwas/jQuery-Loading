@@ -50,15 +50,15 @@
 				src:    'content/images/loading4.gif'
 			},
 			spinnerDOM: {
-				width:   17,
-				height:  17,
+				width:   25,
+				height:  25,
 				matrix: {
-					columns: null,
-					rows:    null
+					x: null,
+					y: null
 				},
 				pin: {
-					width:  3,
-					height: 3,
+					width:  5,
+					height: 5,
 					margin: {
 						top:    1,
 						right:  1,
@@ -183,13 +183,16 @@
 			{
 				var	config = this.options.spinnerDOM;
 
-				if (!config.matrix.columns || !config.matrix.rows) {
-					config.matrix.columns = Math.floor(config.width / (config.pin.width + config.pin.margin.left + config.pin.margin.right));
-					config.matrix.rows    = Math.floor(config.height / (config.pin.height + config.pin.margin.top + config.pin.margin.bottom));
+				if (!config.matrix.x || !config.matrix.y) {
+					config.matrix.x = Math.floor(config.width / (config.pin.width + config.pin.margin.left + config.pin.margin.right));
+					config.matrix.y = Math.floor(config.height / (config.pin.height + config.pin.margin.top + config.pin.margin.bottom));
 				} else {
-					config.pin.width = Math.floor((config.width - ((config.pin.margin.right + config.pin.margin.left) * config.matrix.columns)) / config.matrix.columns);
-					config.pin.height = Math.floor((config.height - ((config.pin.margin.top + config.pin.margin.bottom) * config.matrix.rows)) / config.matrix.rows);
+					config.pin.width = Math.floor((config.width - ((config.pin.margin.right + config.pin.margin.left) * config.matrix.x)) / config.matrix.x);
+					config.pin.height = Math.floor((config.height - ((config.pin.margin.top + config.pin.margin.bottom) * config.matrix.y)) / config.matrix.y);
 				}
+
+                config.matrix.x-= 1;
+                config.matrix.y-= 1;
 
 				if (config.pin.width <= 0 || config.pin.height <= 0) {
 					throw new Error('There is not enough space for spinner.');
@@ -208,10 +211,10 @@
 
 				var pins = {};
 
-				for (var y = 0; y < config.matrix.rows; y++) {
-					pins[y] = {};
-					for (var x = 0; x < config.matrix.columns; x++) {
-						pins[y][x] = $('<div/>')
+				for (var y = 0; y <= config.matrix.y; y++) {
+					for (var x = 0; x <= config.matrix.x; x++) {
+                        pins[x] || (pins[x] = {});
+						pins[x][y] = $('<div/>')
 							.css({
 								margin:     mergeMargin(config.pin.margin),
 								width:      config.pin.width,
@@ -240,22 +243,222 @@
 		runInterval: (function() {
 
 
-            var snakeInterval = function(pins, options, step, position, sign, interval, circles, start)
-            {
-                step     || (step = {x: 0, y: 0});
-                position || (position = {x: 0, y: 0});
-                interval || (interval = 0);
-                circles  || (circles = 0);
-                start    || (start = {x: 0, y: 0});
 
-                position.x+= step.x;
-                position.y+= step.y;
+            var snakeInterval = (function()
+            {
+                var axisReverse = function (axis) {
+                  return axis == 'x' ? 'y' : 'x';
+                };
+
+                var checkIsInMatrix = function(x, y, _) {
+                    var okay = true;
+
+                    okay = okay && (_.matrix.x[0] <= x && x <= _.matrix.x[1]);
+                    okay = okay && (_.matrix.y[0] <= y && y <= _.matrix.y[1]);
+
+                    return okay;
+                };
+
+                var Path = function(_, reverseAxis, reverseSign, zeroMove) {
+                    this.x = _.x;
+                    this.y = _.y;
+                    this.axis = reverseAxis ? axisReverse(_.axis) : _.axis;
+                    this.sign = reverseSign ? -1 * _.sign : _.sign;
+
+                    if (!zeroMove) {
+                        this[this.axis]+= this.sign;
+                    }
+                };
+
+                // todo refactor as hash
+                var resolvers = [
+                    function(_) {
+                        var path = new Path(_, false, false);
+                        return checkIsInMatrix(path.x, path.y, _) ? path : false;
+                    },
+                    function(_) {
+                        var path = new Path(_, true, true);
+                        return checkIsInMatrix(path.x, path.y, _) ? path : false;
+                    },
+                    function(_) {
+                        var path = new Path(_, true, false);
+                        return checkIsInMatrix(path.x, path.y, _) ? path : false;
+                    },
+                    function(_) {
+                        var path = new Path(_, false, true, true);
+                        return checkIsInMatrix(path.x, path.y, _) ? path : false;
+                    }
+                ];
+
+                var resolvePath = function(_) {
+                    var path;
+
+                    for (var x = 0; x < resolvers.length; x++) {
+                        path = resolvers[x](_);
+                        if (path instanceof Path) {
+                            return path;
+                        }
+                    }
+
+                    return false;
+                };
+
+                var likeStart = function(path, _) {
+                    return path.x == _.start.x && path.y == _.start.y;
+                };
+
+                var moveMatrix = function(_, sign) {
+                    var x = [_.matrix.x[0] - sign, _.matrix.x[1] + sign],
+                        y = [_.matrix.y[0] - sign, _.matrix.y[1] + sign];
+
+                    if ((0 <= x[0] && x[0] <= x[1]) && (0 <= y[0] && y[0] <= y[1])) {
+                        _.matrix.x = x;
+                        _.matrix.y = y;
+
+                        return true;
+                    }
+
+                    return false;
+                };
+
+                var moveStart = function(_, sign) {
+                    var x,y;
+
+                    if (sign) {
+                        x = _.start.x - sign;
+                        y = _.start.y - sign;
+                    } else {
+                        x=  _.x;
+                        y = _.y;
+                    }
+
+                    if (checkIsInMatrix(x,y,_)) {
+                        _.start.x = x;
+                        _.start.y = y;
+
+                        return true;
+                    }
+
+                    return false;
+                };
+
+                var reverse = function(_) {
+                    _.sign *= -1;
+                    _.reversed = !_.reversed;
+                }
+
+                return function(pins, options, _) {
+
+                    if (!_) {
+                        _ = {
+                            axis: 'x',
+                            sign: 1,
+                            x: 0,
+                            y: 0,
+                            matrix: {
+                                x: [0, options.matrix.x],
+                                y: [0, options.matrix.y]
+                            },
+                            start: {
+                                x: 0,
+                                y: 0
+                            },
+                            interval: 0,
+                            counter: 0,
+                            reversed: false
+                        };
+                    }
+
+                    var pin = pins[_.x][_.y];
+
+                    /*setTimeout(function() {
+                        effect(pin);
+                    }, _.interval)*/
+
+                    _.counter++;
+                    _.interval+= options.interval;
+
+                    if (_.counter >= 12 * (options.matrix.x + 1) * (options.matrix.y + 1)) return;
+
+                    effect(pins[_.x][_.y]);
+
+                    var resolved = resolvePath(_);
+
+                    if (likeStart(resolved, _)) {
+                        var reverseSign = _.reversed ? 1 : -1;
+
+                        if (!moveMatrix(_, reverseSign)) {
+                            reverse(_);
+                            moveStart(_);
+                            return snakeInterval(pins, options, _)
+                        } else {
+                            moveStart(_, reverseSign);
+                            resolved = resolvePath(_);
+                        }
+                    }
+
+                    if (resolved) {
+                        _.x    = resolved.x;
+                        _.y    = resolved.y;
+                        _.axis = resolved.axis;
+                        _.sign = resolved.sign;
+
+                        snakeInterval(pins, options, _);
+                    } else {
+                        throw new Error('Cant resolve path');
+                    }
+
+
+                };
+
+
+            })();
+
+
+
+
+
+
+
+
+
+/*if (_.loop > 100) return;
+
+snakeInterval(pins, options, _);
+return;
+
+
+
+
+
+
+                if (!algorithm) {
+                    algorithm = {
+                        start:    {x: 0, y: 0},
+                        step:     {x: 0, y: 0},
+                        position: {x: 0, y: 0},
+                        axis:     'x',
+                        way:      options.matrix.x,
+                        interval: 0,
+                        circles:  0
+                    }
+                }
+
+                *//*setTimeout((function(pin){ return function() {
+                 effect(pin);
+                 }})(pins[algorithm.position.y][algorithm.position.x]), algorithm.interval);*//*
+
+                effect(pins[algorithm.position.y][algorithm.position.x]);
+
+                algorithm.position.x+= step.x;
+                algorithm.position.y+= step.y;
+                algorithm.interval+= options.interval;
 
                 if (position.x == start.x && position.y == start.y && circles != 0) {
-                    position.x++;
-                    position.y++;
-                    start.x++;
-                    start.y++;
+                    algorithm.position.x++;
+                    algorithm.position.y++;
+                    algorithm.start.x++;
+                    algorithm.start.y++;
                     options.matrix.x--;
                     options.matrix.y--;
                 }
@@ -264,20 +467,12 @@
                     position = {x: 0, y: 0};
                     start = {x: 0, y: 0};
                     options.matrix = JSON.parse(JSON.stringify({
-                        x: options._matrix.columns - 1,
-                        y: options._matrix.rows - 1
+                        x: options._matrix.x - 1,
+                        y: options._matrix.y - 1
                     }));
                 }
 
                 circles++;
-
-                /*setTimeout((function(pin){ return function() {
-                    effect(pin);
-                }})(pins[position.y][position.x]), interval);*/
-
-                effect(pins[position.y][position.x]);
-
-                interval+= options.interval;
 
                 var columns = options.matrix.x,
                     rows    = options.matrix.y;
@@ -296,9 +491,9 @@
                     if (position.x == start.x && position.y > start.y)   step = {x: 0, y: -1};
                 }
 
-                if (circles >= 6*(options._matrix.columns * options._matrix.rows)) return;
+                if (circles >= 6*(options._matrix.x * options._matrix.y)) return;
                 snakeInterval(pins, options, step, position, sign, interval, circles, start);
-            };
+            };*/
 
 			var intervalious = function(pins, options) {
 				var inter = 0;
@@ -317,10 +512,10 @@
 				var	inter = 0,
 					z = 0;
 
-					while (z < options.matrix.rows * options.matrix.columns) {
+					while (z < options.matrix.y * options.matrix.x) {
 						setTimeout((function(y,x){ return function() {
 							effect(pins[y][x]);
-						}})(parseInt(Math.floor(Math.random() * (options.matrix.rows))),parseInt(Math.floor(Math.random() * (options.matrix.columns)))), inter);
+						}})(parseInt(Math.floor(Math.random() * (options.matrix.y))),parseInt(Math.floor(Math.random() * (options.matrix.x)))), inter);
 
 						inter+= options.interval;
 						z++;
@@ -330,7 +525,7 @@
 			var effect = function(pin) {
 				pin
 					.css({
-						//background: "#"+((1<<24)*Math.random()|0).toString(16)
+						background: "#"+((1<<24)*Math.random()|0).toString(16)
 					})
 					.animate({
 						opacity: pin.data('sign') ? 1 : 0 //0.3
@@ -348,11 +543,7 @@
                         effect: effect
                     },
                     interval: this.options.spinnerDOM.interval,
-                    matrix:   JSON.parse(JSON.stringify({
-                        x: this.options.spinnerDOM.matrix.columns - 1,
-                        y: this.options.spinnerDOM.matrix.rows - 1
-                    })),
-                    _matrix: this.options.spinnerDOM.matrix
+                    matrix:   this.options.spinnerDOM.matrix
                 }
 
                 var pins = this._pins;
@@ -361,7 +552,7 @@
                 snakeInterval(pins, options);
 				/*this._interval = setInterval(function() {
                     intervalious(pins, options);
-                }, options.matrix.columns * options.matrix.rows * options.interval);*/
+                }, options.matrix.x * options.matrix.y * options.interval);*/
 			}
 		})(),
 
