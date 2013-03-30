@@ -1,7 +1,7 @@
 /**
  * jquery.loading - plugin that creates pretty loading spinners for ur elements.
  *
- * Version: 0.1.0
+ * Version: 0.1.3
  *
  * Copyright 2013, Sergey Kamardin.
  *
