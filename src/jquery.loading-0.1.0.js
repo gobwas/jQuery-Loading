@@ -50,15 +50,15 @@
 				src:    'content/images/loading4.gif'
 			},
 			spinnerDOM: {
-				width:   25,
-				height:  25,
+				width:   90,
+				height:  40,
 				matrix: {
 					x: null,
 					y: null
 				},
 				pin: {
-					width:  5,
-					height: 5,
+					width:  7,
+					height: 7,
 					margin: {
 						top:    1,
 						right:  1,
@@ -342,9 +342,27 @@
                     return false;
                 };
 
+                var countPath = function(_) {
+                    var x = _.matrix.x[1] - _.matrix.x[0],
+                        y = _.matrix.y[1] - _.matrix.y[0],
+                        len;
+
+                    if (x == 0 && y == 0) {
+                        return 1;
+                    } else if (x == 0) {
+                        len = y + 1;
+                    } else if (y == 0) {
+                        len = x + 1;
+                    } else {
+                        len = 2 * (x + y)
+                    }
+
+                    return len;
+                };
+
                 var reverse = function(_) {
                     _.sign *= -1;
-                    _.reversed = !_.reversed;
+                    _.reversed *= -1;
                 }
 
                 return function(pins, options, _) {
@@ -365,26 +383,44 @@
                             },
                             interval: 0,
                             counter: 0,
-                            reversed: false
+                            path: 0,
+                            reversed: -1
                         };
+
+                        _.fullPath = countPath(_);
                     }
 
                     var pin = pins[_.x][_.y];
 
-                    /*setTimeout(function() {
+                    setTimeout(function() {
                         effect(pin);
-                    }, _.interval)*/
+                    }, _.interval)
 
                     _.counter++;
+                    _.path++;
                     _.interval+= options.interval;
 
                     if (_.counter >= 12 * (options.matrix.x + 1) * (options.matrix.y + 1)) return;
 
-                    effect(pins[_.x][_.y]);
+                    // for debug
+                    //effect(pins[_.x][_.y]);
+
+
+                    if (_.path == _.fullPath) {
+                        if (!moveMatrix(_, _.reversed)) {
+                            reverse(_);
+                            _.path = 0;
+                            return snakeInterval(pins, options, _);
+                        }
+
+                        _.path = 0;
+                        _.fullPath = countPath(_);
+                    }
 
                     var resolved = resolvePath(_);
 
-                    if (likeStart(resolved, _)) {
+
+                    /*if (likeStart(resolved, _)) {
                         var reverseSign = _.reversed ? 1 : -1;
 
                         if (!moveMatrix(_, reverseSign)) {
@@ -395,7 +431,7 @@
                             moveStart(_, reverseSign);
                             resolved = resolvePath(_);
                         }
-                    }
+                    }*/
 
                     if (resolved) {
                         _.x    = resolved.x;
