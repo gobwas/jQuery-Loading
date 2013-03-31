@@ -1,10 +1,20 @@
 CHANGELOG
 =========
 
-### 0.1.4 (xx-xx-2013)
+### 0.2.1 (xx-xx-2013)
 ______________________
 
+ + Build management via grunt
  + n/a
+
+### 0.2.0 (31-03-2013)
+______________________
+
+ + Separated logic in different files
+ + A lot of refactoring
+ + Added effects stacks functionality
+ + Added setters for user-defined algorithms
+ + Added setters for user-defined effects
 
 ### 0.1.3 (30-03-2013)
 ______________________

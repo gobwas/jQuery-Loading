@@ -30,101 +30,130 @@
 
 (function($){
 
-	var Loading = function(element, options)
-	{
+    var defaults = {
+
+        opacity:    0.9,
+        speedIn:    300,
+        speedOut:   1000,
+
+        type:      'dom',
+        algorithm: 'snake',
+        effect:    'simple',
+
+        spinner: {
+            image: {
+                width:  30,
+                height: 10,
+                src:    'content/images/loading4.gif'
+            },
+            spinnerDOM: {
+                width:   90,
+                height:  40,
+                matrix: {
+                    x: null,
+                    y: null
+                },
+                pin: {
+                    width:  7,
+                    height: 7,
+                    margin: {
+                        top:    1,
+                        right:  1,
+                        bottom: 0,
+                        left:   0
+                    }
+                },
+                interval: 50
+            }
+        },
+
+        background: {
+            color:        'white',
+            position:     '',
+            img:          null,
+            borderRadius: 1
+        }
+    };
+
+    var uniqueId = (function() {
+        var chars = "abcdefghijklmnopqrstuvwxyz0123456789",
+            _length = 50;
+
+        return function(length)
+        {
+            var max = chars.length - 1,
+                id  = '',
+                symbol,
+                i;
+
+            length || (length = _length);
+
+            for (var x = 0; x < length; x++) {
+                i = parseInt(Math.floor(Math.random() * (max + 1)));
+
+                symbol = chars.charAt(i);
+
+                Math.floor(Math.random() * 2) && (symbol = symbol.toUpperCase());
+
+                id+= symbol;
+            }
+
+            return id;
+        };
+    })();
+
+    var spinnerResolver = function(type) {
+        var typeNormalized = 'spinner' + type.charAt(0) + type.slice(1);
+        if (Loading.prototype.hasOwnProperty(typeNormalized)) {
+            return Loading.prototype[typeNormalized];
+        } else {
+            throw new Error('Not found spinners with type "' + type + '"');
+        }
+    };
+
+    var algorithmResolver = function(name) {
+        if (Loading.algorithm.hasOwnProperty(name)) {
+            return Loading.algorithm[name];
+        } else {
+            throw new Error('Algorithm not found: "' + name + '"');
+        }
+    };
+
+    var effectResolver = function(name) {
+        if (Loading.effect.hasOwnProperty(name)) {
+            return Loading.effect[name];
+        } else {
+            throw new Error('Effect not found: "' + name + '"');
+        }
+    };
+
+	var Loading = function(element, options) {
 		options || (options = {});
 
-		this.target = element;
+		this.target  = element;
+		this.id      = uniqueId(50);
+        this.options = {};
 
-		this.id = this.code(50);
+        $.extend(this.options, defaults, options, true);
 
-		this._dimensions = this.dimensions();
+        this.dimensions = {
+            top:      this.target.offset().top,
+            left:     this.target.offset().left,
+            width:    this.target.outerWidth(),
+            height:   this.target.outerHeight()
+        };
 
-		this.options = {
-			opacity:    0.9,
-			speedIn:    300,
-			speedOut:   1000,
-			spinner: {
-				width:  30,
-				height: 10,
-				src:    'content/images/loading4.gif'
-			},
-			spinnerDOM: {
-				width:   90,
-				height:  40,
-				matrix: {
-					x: null,
-					y: null
-				},
-				pin: {
-					width:  7,
-					height: 7,
-					margin: {
-						top:    1,
-						right:  1,
-						bottom: 0,
-						left:   0
-					}
-				},
-				interval: 50,
-				effects: {
-					rows:    null,
-					columns: null,
-					pins:    null
-				}
-			},
-			background: {
-				color:        'white',
-				position:     '',
-				img:          null,
-				borderRadius: 1
-			}
-		};
-
-		$.extend(this.options, options, true);
+        this.spinner   = spinnerResolver(this.options.type);
+        this.algorithm = algorithmResolver(this.options.algorithm);
+        this.effect    = effectResolver(this.options.effect);
 	};
 
-	$.extend(Loading.prototype, {
-		code: (function() {
+    Loading.algorithm = {};
+    Loading.effect    = {};
 
-			var chars = "abcdefghijklmnopqrstuvwxyz0123456789",
-				_length = 50;
+	Loading.prototype = {
 
-			return function(length)
-			{
-				var max = chars.length - 1,
-					id  = '',
-					symbol,
-					i;
-
-				length || (length = _length);
-
-				for (var x = 0; x < length; x++) {
-					i = parseInt(Math.floor(Math.random() * (max + 1)));
-
-					symbol = chars.charAt(i);
-
-					Math.floor(Math.random() * 2) && (symbol = symbol.toUpperCase());
-
-					id+= symbol;
-				}
-
-				return id;
-			};
-		})(),
-
-		dimensions: function()
-		{
-			var dimensions = {
-				position: 'absolute',
-				top:      this.target.offset().top,
-				left:     this.target.offset().left,
-				width:    this.target.outerWidth(),
-				height:   this.target.outerHeight()
-			};
-
-			return dimensions;
-		},
+        constructor: Loading,
 
 		background: function()
 		{
@@ -134,7 +163,7 @@
 				position: 'absolute'
 			};
 
-			$.extend(css, this._dimensions);
+			$.extend(css, this.dimensions);
 
 			css.background = this.options.background.img
 				? this.options.background.color + ' url('+this.options.background.img+') ' + this.options.background.position
@@ -151,7 +180,7 @@
 			return background;
 		},
 
-		spinner: function()
+		spinnerImage: function()
 		{
 			var spinner = $('<img/>'),
 				width   = this.options.spinner.width,
@@ -164,8 +193,8 @@
 				})
 				.css({
 					position: 'absolute',
-					left:     (this._dimensions.width - width) /2,
-					top:      (this._dimensions.height - height) / 2,
+					left:     (this.dimensions.width - width) /2,
+					top:      (this.dimensions.height - height) / 2,
 					width:    width,
 					height:   height
 				});
@@ -173,7 +202,7 @@
 			return spinner;
 		},
 
-		spinnerDOM: (function() {
+		spinnerDom: (function() {
 
 			var mergeMargin = function(margin) {
 				return margin.top + 'px ' + margin.right + 'px ' + margin.bottom + 'px ' + margin.left + 'px';
@@ -201,8 +230,8 @@
 				var spinner = $('<div/>');
 				spinner.css({
 					position: 'absolute',
-					left:     (this._dimensions.width - config.width) /2,
-					top:      (this._dimensions.height - config.height) / 2,
+					left:     (this.dimensions.width - config.width) /2,
+					top:      (this.dimensions.height - config.height) / 2,
 					width:    config.width,
 					height:   config.height
 				});
@@ -241,8 +270,6 @@
 		})(),
 
 		runInterval: (function() {
-
-
 
             var snakeInterval = (function()
             {
@@ -405,7 +432,6 @@
                     // for debug
                     //effect(pins[_.x][_.y]);
 
-
                     if (_.path == _.fullPath) {
                         if (!moveMatrix(_, _.reversed)) {
                             reverse(_);
@@ -419,20 +445,6 @@
 
                     var resolved = resolvePath(_);
 
-
-                    /*if (likeStart(resolved, _)) {
-                        var reverseSign = _.reversed ? 1 : -1;
-
-                        if (!moveMatrix(_, reverseSign)) {
-                            reverse(_);
-                            moveStart(_);
-                            return snakeInterval(pins, options, _)
-                        } else {
-                            moveStart(_, reverseSign);
-                            resolved = resolvePath(_);
-                        }
-                    }*/
-
                     if (resolved) {
                         _.x    = resolved.x;
                         _.y    = resolved.y;
@@ -443,93 +455,10 @@
                     } else {
                         throw new Error('Cant resolve path');
                     }
-
-
                 };
 
 
             })();
-
-
-
-
-
-
-
-
-
-/*if (_.loop > 100) return;
-
-snakeInterval(pins, options, _);
-return;
-
-
-
-
-
-
-                if (!algorithm) {
-                    algorithm = {
-                        start:    {x: 0, y: 0},
-                        step:     {x: 0, y: 0},
-                        position: {x: 0, y: 0},
-                        axis:     'x',
-                        way:      options.matrix.x,
-                        interval: 0,
-                        circles:  0
-                    }
-                }
-
-                *//*setTimeout((function(pin){ return function() {
-                 effect(pin);
-                 }})(pins[algorithm.position.y][algorithm.position.x]), algorithm.interval);*//*
-
-                effect(pins[algorithm.position.y][algorithm.position.x]);
-
-                algorithm.position.x+= step.x;
-                algorithm.position.y+= step.y;
-                algorithm.interval+= options.interval;
-
-                if (position.x == start.x && position.y == start.y && circles != 0) {
-                    algorithm.position.x++;
-                    algorithm.position.y++;
-                    algorithm.start.x++;
-                    algorithm.start.y++;
-                    options.matrix.x--;
-                    options.matrix.y--;
-                }
-
-                if ((options.matrix.x - start.x) <= 0 || (options.matrix.y - start.y) <= 0) {
-                    position = {x: 0, y: 0};
-                    start = {x: 0, y: 0};
-                    options.matrix = JSON.parse(JSON.stringify({
-                        x: options._matrix.x - 1,
-                        y: options._matrix.y - 1
-                    }));
-                }
-
-                circles++;
-
-                var columns = options.matrix.x,
-                    rows    = options.matrix.y;
-
-                if (position.x == start.x && position.y == start.y) {
-                    sign = 1;
-                } else if (position.x == columns && position.y == rows) {
-                    sign = 0;
-                }
-
-                if (sign) {
-                    if (position.x < columns && position.y < rows)   step = {x: 1, y: 0};
-                    if (position.x == columns && position.y < rows)   step = {x: 0, y: 1};
-                } else {
-                    if (position.x > start.x && position.y > start.y) step = {x: -1, y: 0};
-                    if (position.x == start.x && position.y > start.y)   step = {x: 0, y: -1};
-                }
-
-                if (circles >= 6*(options._matrix.x * options._matrix.y)) return;
-                snakeInterval(pins, options, step, position, sign, interval, circles, start);
-            };*/
 
 			var intervalious = function(pins, options) {
 				var inter = 0;
@@ -606,7 +535,7 @@ return;
 		{
 
 		}
-	});
+	};
 
 	$.fn.loading = function(options) {
 		var loading = new Loading(this, options);
