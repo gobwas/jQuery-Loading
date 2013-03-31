@@ -118,26 +118,32 @@
         var reverse = function(_) {
             _.sign *= -1;
             _.reversed *= -1;
+        };
+
+        var reset = function(matrix) {
+            var _ = {
+                x: 0,
+                y: 0,
+
+                axis: 'x',
+                sign: 1,
+                matrix: {
+                    x: [0, matrix.x],
+                    y: [0, matrix.y]
+                },
+                path: 0,
+                reversed: -1
+            };
+
+            _.fullPath = countPath(_);
+
+            return _;
         }
 
         return function(matrix, _) {
 
             if (!_) {
-                _ = {
-                    x: 0,
-                    y: 0,
-
-                    axis: 'x',
-                    sign: 1,
-                    matrix: {
-                        x: [0, matrix.x],
-                        y: [0, matrix.y]
-                    },
-                    path: 0,
-                    reversed: -1
-                };
-
-                _.fullPath = countPath(_);
+                _ = reset(matrix);
 
                 _.path++;
                 return _;
@@ -148,6 +154,7 @@
                     reverse(_);
                     _.path = 0;
 
+                    //_ = reset(matrix);
                     _.path++;
                     return _;
                 }

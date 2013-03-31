@@ -10,8 +10,8 @@
         effect:    ['simple'],
 
         spinner: {
-            width:   90,
-            height:  40,
+            width:   35,
+            height:  35,
             matrix: {
                 x: null,
                 y: null
