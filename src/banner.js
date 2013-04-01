@@ -1,14 +1,14 @@
 /**
- * jquery.loading - plugin that creates pretty loading spinners for ur elements.
+ * <%= pkg.name %> - <%= pkg.description %>.
  *
- * Version: 0.1.4-dev
+ * Version: <%= pkg.version %>
  *
- * Copyright 2013, Sergey Kamardin.
+ * Copyright <%= grunt.template.today("yyyy") %>, Sergey Kamardin.
  *
  * Licensed under the MIT license.
  * http://www.opensource.org/licenses/mit-license.php
  *
- * Date: 22.03.2013
+ * Date: <%= grunt.template.today("yyyy-mm-dd") %>
  * Location: Moscow, Russia.
  * Contact: gobwas@gmail.com
  *
