@@ -1,0 +1,20 @@
+{
+  "name": "jquery-loading",
+  "title": "jQuery Loading Plugin",
+  "version": "0.2.1",
+  "description": "Shows loading progress animation, flxible and pretty =)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gobwas/jQuery-Loading.git"
+  },
+  "keywords": [
+    "jquery",
+    "loading",
+    "plugin",
+    "spinner",
+    "progress"
+  ],
+  "author": "Sergey Kamardin",
+  "license": "MIT",
+  "readmeFilename": "README.md"
+}
