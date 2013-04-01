@@ -4,7 +4,7 @@ module.exports = function(grunt) {
         pkg: grunt.file.readJSON('package.json'),
         concat: {
             options: {
-                separator: ';\n\n\n',
+                separator: '\n\n\n',
                 banner: grunt.file.read('build/banner.txt')
             },
             dist: {
