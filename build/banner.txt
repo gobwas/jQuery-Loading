@@ -1,14 +1,14 @@
 /**
- * <%= pkg.name %> - <%= pkg.description %>.
+ * <%= pkg.title %> - <%= pkg.description %>.
  *
  * Version: <%= pkg.version %>
+ * Date: <%= grunt.template.today("yyyy-mm-dd HH:MM:ss") %>
  *
  * Copyright <%= grunt.template.today("yyyy") %>, Sergey Kamardin.
  *
  * Licensed under the MIT license.
  * http://www.opensource.org/licenses/mit-license.php
  *
- * Date: <%= grunt.template.today("yyyy-mm-dd") %>
  * Location: Moscow, Russia.
  * Contact: gobwas@gmail.com
  *
@@ -26,3 +26,5 @@
  *        \/__/       \/__/         \/__/         \/__/         \/__/
  *
  */
+
+

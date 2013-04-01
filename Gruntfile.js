@@ -1,23 +1,45 @@
 module.exports = function(grunt) {
 
-    // Project configuration.
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
+        concat: {
+            options: {
+                separator: ';\n\n\n',
+                banner: grunt.file.read('build/banner.txt')
+            },
+            dist: {
+                src: ['src/core.js', 'src/config.js', 'src/algorithm/*.js', 'src/effect/*.js'],
+                dest: "../build/<%= pkg.name.replace('-','.') %>-<%= pkg.version %>.js"
+            }
+        },
         uglify: {
             options: {
-                banner: grunt.file.read('src/banner.js')
+                banner: grunt.file.read('build/banner.min.txt')
             },
             build: {
-                src: 'src/core.js',
-                dest: '../build/core.min.js'
+                src: '<%= concat.dist.dest %>',
+                dest: "../build/<%= pkg.name.replace('-','.') %>-<%= pkg.version %>.min.js"
+            }
+        },
+        jshint: {
+            files: ['Gruntfile.js', 'src/**/*.js'],
+            options: {
+                globals: {
+                    jQuery: true,
+                    console: true,
+                    module: true,
+                    document: true
+                }
             }
         }
     });
 
-    // Load the plugin that provides the "uglify" task.
+    grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-contrib-jshint');
 
-    // Default task(s).
-    grunt.registerTask('default', ['uglify']);
+    grunt.registerTask('test', ['jshint']);
+
+    grunt.registerTask('default', ['concat', 'uglify']);
 
 };
