@@ -1,13 +1,13 @@
 CHANGELOG
 =========
 
-### 0.2.3 (xx-xx-2013)
+### 0.2.2 (xx-xx-2013)
 ______________________
 
  + Bug fix if vertical (-)
  + JSHint valid (-)
 
-### 0.2.1(2) (03-03-2013)
+### 0.2.1 (03-03-2013)
 ______________________
 
  + Build management via grunt
