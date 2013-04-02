@@ -8,7 +8,9 @@
         "url": "https://github.com/gobwas/jQuery-Loading.git"
     },
     "homepage": "http://gobwas.github.com/jQuery-Loading",
-    "download" : "http://gobwas.github.com/jQuery-Loading/build/jquery.loading.min.js",
+    "demo": "http://gobwas.github.com/jQuery-Loading",
+    "docs": "https://github.com/gobwas/jQuery-Loading/wiki",
+    "download": "http://gobwas.github.com/jQuery-Loading/build/jquery.loading.min.js",
     "bugs": "https://github.com/gobwas/jQuery-Loading/issues",
     "keywords": [
         "jquery",
