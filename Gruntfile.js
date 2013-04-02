@@ -9,7 +9,7 @@ module.exports = function(grunt) {
             },
             dist: {
                 src: ['src/core.js', 'src/config.js', 'src/algorithm/*.js', 'src/effect/*.js'],
-                dest: "../build/<%= pkg.name.replace('-','.') %>-<%= pkg.version %>.js"
+                dest: "../gh-pages/build/<%= pkg.name.replace('-','.') %>.js"
             }
         },
         uglify: {
@@ -18,7 +18,7 @@ module.exports = function(grunt) {
             },
             build: {
                 src: '<%= concat.dist.dest %>',
-                dest: "../build/<%= pkg.name.replace('-','.') %>-<%= pkg.version %>.min.js"
+                dest: "../gh-pages/build/<%= pkg.name.replace('-','.') %>.min.js"
             }
         },
         jshint: {

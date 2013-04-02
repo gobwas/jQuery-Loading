@@ -31,6 +31,7 @@
 
         background: {
             color:        'white',
+            opacity:      0.8,
             position:     '',
             img:          null,
             borderRadius: 1

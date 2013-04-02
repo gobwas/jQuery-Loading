@@ -151,7 +151,8 @@
             var background = $('<div/>');
 
             var css = {
-                position: 'absolute'
+                position: 'absolute',
+                opacity: options.opacity
             };
 
             $.extend(css, dimensions);
