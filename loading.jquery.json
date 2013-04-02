@@ -7,7 +7,7 @@
         "type": "git",
         "url": "https://github.com/gobwas/jQuery-Loading.git"
     },
-    "homepage": "https://gobwas.github.com/jQuery-Loading",
+    "homepage": "http://gobwas.github.com/jQuery-Loading",
     "bugs": "https://github.com/gobwas/jQuery-Loading/issues",
     "keywords": [
         "jquery",
