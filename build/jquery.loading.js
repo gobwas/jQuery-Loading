@@ -1,8 +1,8 @@
 /**
- * jQuery Loading Plugin - Shows loading progress animation, flexible and pretty =).
+ * jQuery Loading - Shows loading progress animation, flexible and pretty =).
  *
- * Version: 0.2.1
- * Date: 2013-04-03 00:09:34
+ * Version: 0.2.2
+ * Date: 2013-04-03 00:38:22
  *
  * Copyright 2013, Sergey Kamardin.
  *
