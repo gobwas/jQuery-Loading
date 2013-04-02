@@ -1,6 +1,6 @@
 {
     "name": "loading",
-    "title": "jQuery Loading Plugin",
+    "title": "jQuery Loading",
     "description": "Shows loading progress animation, flexible and pretty =)",
     "version": "0.2.1",
     "repository": {
