@@ -1,13 +1,13 @@
 CHANGELOG
 =========
 
-### 0.2.3 (xx-xx-2013)
+### 0.2.4 (xx-xx-2013)
 ______________________
 
  + Bug fix if vertical (-)
  + JSHint valid (-)
 
-### 0.2.2 (04-03-2013)
+### 0.2.2(3) (04-03-2013)
 
  + Actualization of jquery plugin manifest
 
