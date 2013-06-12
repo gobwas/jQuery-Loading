@@ -103,15 +103,17 @@
 <script type="text/javascript">
     (function($) {
         $.fn.loading.effect('site', function(pin, interval, callback) {
+            // init pin
             if (!pin.data('site-init')) {
                 pin
                     .css({
                         background: '#999999',
                         opacity: 0
                     })
-                    .data('simple-init', true)
+                    .data('site-init', true)
             }
 
+            // apply effect to pin
             pin
                 .data('site-sign', pin.data('site-sign') ? false : true)
                 .animate({
@@ -191,9 +193,7 @@
                 img:          null,
                 borderRadius: 1
             }
-        })
-
-        $('#head-example').loading();
+        });
     })
 </script>
 
