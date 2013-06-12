@@ -2,7 +2,7 @@
     "name": "loading",
     "title": "jQuery Loading",
     "description": "Shows loading progress animation, flexible and pretty =)",
-    "version": "0.2.4",
+    "version": "0.2.5",
     "repository": {
         "type": "git",
         "url": "https://github.com/gobwas/jQuery-Loading.git"
