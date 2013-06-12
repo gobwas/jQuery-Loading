@@ -1,8 +1,8 @@
 /**
  * jQuery Loading - Shows loading progress animation, flexible and pretty =).
  *
- * Version: 0.2.3
- * Date: 2013-04-03 10:39:57
+ * Version: 0.2.4
+ * Date: 2013-06-13 01:12:44
  *
  * Copyright 2013, Sergey Kamardin.
  *
@@ -29,6 +29,8 @@
 
 
 (function($){
+    "use strict";
+
     /**
      * Class definition.
      *
@@ -36,8 +38,7 @@
      * @param options
      * @constructor
      */
-    var Loading = (function() {
-
+    var Loading = function(element, options) {
         /**
          * Generate uniqueId for instance.
          * Uses for non-conflict with DOM elements ID.
@@ -59,7 +60,7 @@
                 length || (length = _length);
 
                 for (var x = 0; x < length; x++) {
-                    i = parseInt(Math.floor(Math.random() * (max + 1)));
+                    i = parseInt(Math.floor(Math.random() * (max + 1)), 10);
 
                     symbol = chars.charAt(i);
 
@@ -106,30 +107,32 @@
          * @returns {Function}
          */
         var effectResolver = function(name) {
+            var effect;
+
             if (typeof name == 'function') {
-                return name;
+                effect = name;
+                effect.count = 1;
+                return effect;
             }
 
             if (name instanceof Array) {
-                var effects;
-                for (var x = name.length - 1; x >= 0; x--) {
-                    effects = (function(effect, x, effects) {
-                        return function() {
-                            effect.apply(null, arguments);
-                            if (effects) {
-                                effects.apply(null, arguments);
-                            }
-                        };
-                    })(effectResolver(name[x]), x, effects);
+                var effects = [];
+                for (var x = 0; x < name.length; x++) {
+                    effects.push(effectResolver(name[x]));
                 }
 
-                effects.count = name.length;
+                effect = function() {
+                    for (var x = 0; x < effects.length; x++) {
+                        effects[x].apply(null, arguments);
+                    }
+                };
+                effect.count = effects.length;
 
-                return effects;
+                return effect;
 
             } else {
                 if (Loading.effect.hasOwnProperty(name)) {
-                    var effect = Loading.effect[name];
+                    effect = Loading.effect[name];
                     effect.count = 1;
                     return effect;
                 } else {
@@ -187,9 +190,10 @@
 
             $.extend(css, dimensions);
 
-            css.background = options.img
-                ? options.color + ' url('+options.img+') ' + options.position
-                : options.color;
+            css.background =
+                options.img ?
+                    options.color + ' url('+options.img+') ' + options.position :
+                    options.color;
 
             options.borderRadius && (css['border-radius'] = options.borderRadius);
 
@@ -219,7 +223,7 @@
                 })
                 .attr({
                     'class': 'loading-pin'
-                })
+                });
 
             return pin;
         };
@@ -271,90 +275,139 @@
         };
 
         // Constructor
-        return function(element, options) {
-            options || (options = {});
 
-            this.target  = element;
-            this.id      = uniqueId(50);
-            this.options = optionsNormalizer($.extend({}, $.fn.loading.defaults, options, true));
+        options || (options = {});
 
-            this.dimensions = {
-                top:    this.target.offset().top,
-                left:   this.target.offset().left,
-                width:  this.target.outerWidth(),
-                height: this.target.outerHeight()
-            };
+        this.target  = element;
+        this.id      = uniqueId(50);
+        this.options = optionsNormalizer($.extend(true, {}, $.fn.loading.defaults, options));
 
-            this.pins       = createPins(this.options.spinner);
+        this.dimensions = {
+            top:    this.target.offset().top,
+            left:   this.target.offset().left,
+            width:  this.target.outerWidth(),
+            height: this.target.outerHeight()
+        };
 
-            this.background = createBackground(this.options.background, this.dimensions);
-            this.spinner    = createSpinner(this.options.spinner, this.dimensions, this.pins);
+        this.runtime = {
+            progress: 0,
+            interval: null
+        };
 
-            this.algorithm = algorithmResolver(this.options.algorithm);
-            this.effect    = effectResolver(this.options.effect);
+        this.pins = createPins(this.options.spinner);
 
-            this.counter   = 0;
+        this.background = createBackground(this.options.background, this.dimensions);
+        this.spinner    = createSpinner(this.options.spinner, this.dimensions, this.pins);
 
-            this.initialize(options);
+        this.algorithm = algorithmResolver(this.options.algorithm);
+        this.algorithmData = null;
+
+        this.effect = effectResolver(this.options.effect);
+
+        this.counter = 0;
+
+        this.update(options.runtime);
+    };
+
+    Loading.prototype = (function() {
+        /**
+         * Checking runtime options.
+         *
+         * @private
+         * @static
+         */
+        var _checkRuntime = function() {
+            if ((typeof this.runtime.progress == 'number' && this.runtime.progress >= 100)) {
+                _destruct.call(this);
+                return;
+            }
+
+            if (typeof this.runtime.interval == 'number' && this.runtime.interval != this.actualInterval) {
+                this.pause();
+                this.resume(this.runtime.interval);
+            }
+        };
+
+        /**
+         * Deletes Loading instance.
+         *
+         * @private
+         * @static
+         */
+        var _destruct = function() {
+            clearInterval(this.intervalId);
+
+            // maybe here must apply easeOut fx, then on fx ends, remove all divs
+            this.background.remove();
+
+            this.target.removeData('loading');
+        };
+
+        return {
+            /**
+             * Save reference to the constructor.
+             */
+            constructor: Loading,
+
+            /**
+             * Initializes runtime parameters.
+             *
+             * @param options Runtime options
+             */
+            update: function(options) {
+                options || (options = {});
+                $.extend(true, this.runtime, options);
+            },
+
+            /**
+             * Shows loading element.
+             */
+            show: function() {
+                this.background.append(this.spinner).appendTo(this.target);
+            },
+
+            /**
+             * Starts animation.
+             */
+            start: function(interval)
+            {
+                this.actualInterval = interval || this.options.spinner.interval;
+
+                if (this.actualInterval > 0x7fffffff) this.actualInterval = 0x7fffffff;
+
+                var loading = this,
+                    matrix = {x: this.options.spinner.matrix.x, y: this.options.spinner.matrix.y},
+                    effectInterval = Math.round(this.actualInterval/this.effect.count);
+
+                this.intervalId = setInterval(function() {
+                    loading.algorithmData = loading.algorithm(matrix, loading.algorithmData);
+                    loading.effect(loading.pins[loading.algorithmData.x][loading.algorithmData.y], effectInterval, loading.runtime);
+                    loading.counter++;
+
+                    // call private method
+                    _checkRuntime.call(loading);
+                }, this.actualInterval);
+            },
+
+            /**
+             * Pauses animation.
+             */
+            pause: function()
+            {
+                clearInterval(this.intervalId);
+            },
+
+            /**
+             * Resumes animation.
+             *
+             * @param interval
+             */
+            resume: function(interval)
+            {
+                this.start(interval);
+            }
         };
     })();
-
-    Loading.prototype = {
-        constructor: Loading,
-
-        /**
-         * Initializes parameters.
-         * Can be called in a runtime.
-         *
-         * @param options
-         */
-        initialize: function(options) {
-            options || (options = {});
-
-            if (options.progress) {
-                this.progress = options.progress;
-            }
-        },
-
-        /**
-         * Shows loading element.
-         */
-        show: function() {
-            this.background.append(this.spinner).appendTo(this.target);
-        },
-
-        /**
-         * Starts animation.
-         */
-        start: function()
-        {
-            var matrix        = {x: this.options.spinner.matrix.x, y: this.options.spinner.matrix.y},
-                interval      = Math.max(this.options.spinner.interval/this.effect.count, 0),
-                pins          = this.pins,
-                algorithmData = null,
-                algorithm     = this.algorithm,
-                effect        = this.effect,
-                loading       = this;
-
-            this.interval = setInterval(function() {
-
-                algorithmData = algorithm(matrix, algorithmData);
-                effect(pins[algorithmData.x][algorithmData.y], interval);
-
-                loading.counter++;
-
-                if (loading.progress >= 100) loading.stop();
-            }, interval);
-        },
-
-        /**
-         * Stops animation.
-         */
-        stop: function()
-        {
-            clearInterval(this.interval);
-        }
-    };
 
     /**
      * Container for algorithm functions.
@@ -373,16 +426,18 @@
      * @param options
      */
     $.fn.loading = function(options) {
+        var loading;
+
         if (!this.data('loading')) {
-            var loading = new Loading(this, options);
+            loading = new Loading(this, options);
             this.data({loading: loading});
 
             loading.show();
             loading.start();
         } else {
-            var loading = this.data('loading');
+            loading = this.data('loading');
 
-            loading.initialize(options);
+            loading.update(options);
         }
     };
 
@@ -410,12 +465,12 @@
 
 
 (function($) {
+    "use strict";
+
     $.fn.loading.defaults = {
         opacity:    0.9,
-        speedIn:    300,
-        speedOut:   1000,
-
-        progress: 0,
+        //speedIn:    300,
+        //speedOut:   1000,
 
         algorithm: 'snake',
         effect:    ['simple'],
@@ -453,6 +508,8 @@
 
 
 (function($) {
+    "use strict";
+
     $.fn.loading.algorithm('linear', function(matrix, _) {
 
     });
@@ -462,6 +519,8 @@
 
 
 (function($) {
+    "use strict";
+
     $.fn.loading.algorithm('random', function(options, _) {
         /*var	inter = 0,
             z = 0;
@@ -482,6 +541,8 @@
 
 
 (function($) {
+    "use strict";
+
     $.fn.loading.algorithm('snake', (function()
     {
         var axisReverse = function (axis) {
@@ -585,14 +646,14 @@
                 y = _.matrix.y[1] - _.matrix.y[0],
                 len;
 
-            if (x == 0 && y == 0) {
+            if (x === 0 && y === 0) {
                 return 1;
-            } else if (x == 0) {
+            } else if (x === 0) {
                 len = y + 1;
-            } else if (y == 0) {
+            } else if (y === 0) {
                 len = x + 1;
             } else {
-                len = 2 * (x + y)
+                len = 2 * (x + y);
             }
 
             return len;
@@ -621,7 +682,7 @@
             _.fullPath = countPath(_);
 
             return _;
-        }
+        };
 
         return function(matrix, _) {
 
@@ -667,36 +728,64 @@
 
 
 (function($) {
-    $.fn.loading.effect('fancy', function(pin, interval) {
+    "use strict";
+
+    $.fn.loading.effect('fancy', function(pin, interval, runtime) {
         pin
             .css({
                 background: "#"+((1<<24)*Math.random()|0).toString(16)
             })
             .animate({width: '-=2', height: '-=2', top: '+=1', left: '+=1'}, interval/2)
-            .animate({width: '+=2', height: '+=2', top: '-=1', left: '-=1'}, interval/2)
+            .animate({width: '+=2', height: '+=2', top: '-=1', left: '-=1'}, interval/2);
     });
 }).call(this, jQuery);
 
 
 (function($) {
-    $.fn.loading.effect('jump', function(pin, interval) {
+    "use strict";
+
+    $.fn.loading.effect('jump', function(pin, interval, runtime) {
         var rnd = Math.floor(Math.random() * 7 + 1);
         pin
             .animate({top: '-=' + rnd}, interval/3 * 2)
-            .animate({top: '+=' + rnd}, interval/3)
+            .animate({top: '+=' + rnd}, interval/3);
     });
 }).call(this, jQuery);
 
 
 (function($) {
-    $.fn.loading.effect('simple', function(pin, interval, callback) {
+    "use strict";
+
+    $.fn.loading.effect('simple-progress', function(pin, interval, runtime) {
+        if (!pin.data('simple-progress-init')) {
+            pin
+                .css({
+                    background: 'green',
+                    opacity: runtime.progress/100
+                })
+                .data('simple-progress-init', true);
+        }
+
+        pin
+            .data('simple-progress-sign', pin.data('simple-progress-sign') ? false : true)
+            .animate({
+                opacity: pin.data('simple-progress-sign') ? 1 : runtime.progress/100
+            }, interval);
+    });
+}).call(this, jQuery);
+
+
+(function($) {
+    "use strict";
+
+    $.fn.loading.effect('simple', function(pin, interval, runtime) {
         if (!pin.data('simple-init')) {
             pin
                 .css({
                     background: 'green',
                     opacity: 0
                 })
-                .data('simple-init', true)
+                .data('simple-init', true);
         }
 
         pin
