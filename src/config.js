@@ -7,7 +7,7 @@
         //speedOut:   1000,
 
         algorithm: 'snake',
-        effect:    ['simple-progress'],
+        effect:    ['simple'],
 
         spinner: {
             width:   35,
