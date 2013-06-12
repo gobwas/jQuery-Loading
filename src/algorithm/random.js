@@ -1,4 +1,6 @@
 (function($) {
+    "use strict";
+
     $.fn.loading.algorithm('random', function(options, _) {
         /*var	inter = 0,
             z = 0;

@@ -1,4 +1,6 @@
 (function($) {
+    "use strict";
+
     $.fn.loading.algorithm('linear', function(matrix, _) {
 
     });

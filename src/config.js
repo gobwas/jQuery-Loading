@@ -1,13 +1,13 @@
 (function($) {
+    "use strict";
+
     $.fn.loading.defaults = {
         opacity:    0.9,
         speedIn:    300,
         speedOut:   1000,
 
-        progress: 0,
-
         algorithm: 'snake',
-        effect:    ['simple'],
+        effect:    ['simple-progress'],
 
         spinner: {
             width:   35,
@@ -35,6 +35,10 @@
             position:     '',
             img:          null,
             borderRadius: 1
+        },
+
+        runtime: {
+            progress: 0
         }
     };
 })(jQuery);

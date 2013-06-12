@@ -1,4 +1,6 @@
 (function($) {
+    "use strict";
+
     $.fn.loading.algorithm('snake', (function()
     {
         var axisReverse = function (axis) {
@@ -102,14 +104,14 @@
                 y = _.matrix.y[1] - _.matrix.y[0],
                 len;
 
-            if (x == 0 && y == 0) {
+            if (x === 0 && y === 0) {
                 return 1;
-            } else if (x == 0) {
+            } else if (x === 0) {
                 len = y + 1;
-            } else if (y == 0) {
+            } else if (y === 0) {
                 len = x + 1;
             } else {
-                len = 2 * (x + y)
+                len = 2 * (x + y);
             }
 
             return len;
@@ -138,7 +140,7 @@
             _.fullPath = countPath(_);
 
             return _;
-        }
+        };
 
         return function(matrix, _) {
 

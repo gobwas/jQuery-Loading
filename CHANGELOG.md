@@ -1,11 +1,17 @@
 CHANGELOG
 =========
-
-### 0.2.4 (xx-xx-2013)
+### 0.2.5 (xx-xx-2013)
 ______________________
 
- + Bug fix if vertical (-)
- + JSHint valid (-)
+ + n/a
+
+### 0.2.4 (12-06-2013)
+______________________
+
+ + Bug fixes in example
+ + Added ability to set runtime options such as interval, progress, signal
+ + Bug fix if spinner is vertical (snake)
+ + JSHint valid
 
 ### 0.2.2(3) (04-03-2013)
 

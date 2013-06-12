@@ -1,12 +1,14 @@
 (function($) {
-    $.fn.loading.effect('simple', function(pin, interval, callback) {
+    "use strict";
+
+    $.fn.loading.effect('simple', function(pin, interval, runtime) {
         if (!pin.data('simple-init')) {
             pin
                 .css({
                     background: 'green',
                     opacity: 0
                 })
-                .data('simple-init', true)
+                .data('simple-init', true);
         }
 
         pin
