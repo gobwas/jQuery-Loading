@@ -37,4 +37,4 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks "grunt-contrib-jshint"
 
   grunt.registerTask "test",    ["jshint"]
-  grunt.registerTask "default", ["concat", "uglify"]
+  grunt.registerTask "default", ["jshint", "concat", "uglify"]

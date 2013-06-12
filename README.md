@@ -6,6 +6,22 @@ with ability to push your own effects&algorithms for animations.
 
 It also have predefined algorithms and effects.
 
+Usage
+=====
+
+```javascript
+
+// initialize loader with options:
+// options are listed in wiki
+$('#my-element').loading(options);
+
+// update runtime options of loading:
+// progress >= 100 will delete loader;
+// interval - u can change the speed of the current animation
+$('#my-element').loading({progress: 50, interval: 100});
+
+```
+
 Algorithms
 ----------
 
@@ -15,7 +31,10 @@ Algorithms
 Effects
 -------
 
- + Simple show/hide effect
+ + Simple show/hide
+ + Simple show/hide depends on progress
+ + Fancy color changing
+ + Jumping
 
 Creating your own animations
 ============================

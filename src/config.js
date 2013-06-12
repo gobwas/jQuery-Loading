@@ -3,8 +3,8 @@
 
     $.fn.loading.defaults = {
         opacity:    0.9,
-        speedIn:    300,
-        speedOut:   1000,
+        //speedIn:    300,
+        //speedOut:   1000,
 
         algorithm: 'snake',
         effect:    ['simple-progress'],
@@ -35,10 +35,6 @@
             position:     '',
             img:          null,
             borderRadius: 1
-        },
-
-        runtime: {
-            progress: 0
         }
     };
 })(jQuery);

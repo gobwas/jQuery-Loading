@@ -8,8 +8,7 @@
      * @param options
      * @constructor
      */
-    var Loading = (function() {
-
+    var Loading = function(element, options) {
         /**
          * Generate uniqueId for instance.
          * Uses for non-conflict with DOM elements ID.
@@ -163,8 +162,8 @@
 
             css.background =
                 options.img ?
-                options.color + ' url('+options.img+') ' + options.position :
-                options.color;
+                    options.color + ' url('+options.img+') ' + options.position :
+                    options.color;
 
             options.borderRadius && (css['border-radius'] = options.borderRadius);
 
@@ -246,45 +245,46 @@
         };
 
         // Constructor
-        return function Loading(element, options) {
-            options || (options = {});
 
-            this.target  = element;
-            this.id      = uniqueId(50);
-            this.options = optionsNormalizer($.extend(true, {}, $.fn.loading.defaults, options));
+        options || (options = {});
 
-            this.dimensions = {
-                top:    this.target.offset().top,
-                left:   this.target.offset().left,
-                width:  this.target.outerWidth(),
-                height: this.target.outerHeight()
-            };
+        this.target  = element;
+        this.id      = uniqueId(50);
+        this.options = optionsNormalizer($.extend(true, {}, $.fn.loading.defaults, options));
 
-            this.runtime = {
-                progress: 0,
-                interval: null
-            };
-
-            this.pins = createPins(this.options.spinner);
-
-            this.background = createBackground(this.options.background, this.dimensions);
-            this.spinner    = createSpinner(this.options.spinner, this.dimensions, this.pins);
-
-            this.algorithm = algorithmResolver(this.options.algorithm);
-            this.algorithmData = null;
-
-            this.effect = effectResolver(this.options.effect);
-
-            this.counter = 0;
-
-            this.update(options.runtime);
+        this.dimensions = {
+            top:    this.target.offset().top,
+            left:   this.target.offset().left,
+            width:  this.target.outerWidth(),
+            height: this.target.outerHeight()
         };
-    })();
+
+        this.runtime = {
+            progress: 0,
+            interval: null
+        };
+
+        this.pins = createPins(this.options.spinner);
+
+        this.background = createBackground(this.options.background, this.dimensions);
+        this.spinner    = createSpinner(this.options.spinner, this.dimensions, this.pins);
+
+        this.algorithm = algorithmResolver(this.options.algorithm);
+        this.algorithmData = null;
+
+        this.effect = effectResolver(this.options.effect);
+
+        this.counter = 0;
+
+        this.update(options.runtime);
+    };
 
     Loading.prototype = (function() {
         /**
-         * Private static method.
          * Checking runtime options.
+         *
+         * @private
+         * @static
          */
         var _checkRuntime = function() {
             if ((typeof this.runtime.progress == 'number' && this.runtime.progress >= 100)) {
@@ -299,8 +299,10 @@
         };
 
         /**
-         * Private static method.
          * Deletes Loading instance.
+         *
+         * @private
+         * @static
          */
         var _destruct = function() {
             clearInterval(this.intervalId);
