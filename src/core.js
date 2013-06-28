@@ -253,11 +253,21 @@
         this.options = optionsNormalizer($.extend(true, {}, $.fn.loading.defaults, options));
 
         this.dimensions = {
-            top:    this.target.offset().top,
-            left:   this.target.offset().left,
             width:  this.target.outerWidth(),
             height: this.target.outerHeight()
         };
+
+	    if (/^relative|absolute$/gi.test(this.target.css('position'))) {
+		    $.extend(this.dimensions, {
+			    top: 0,
+			    left: 0
+		    });
+	    } else {
+		    $.extend(this.dimensions, {
+			    top:    this.target.offset().top,
+			    left:   this.target.offset().left
+		    });
+	    }
 
         this.runtime = {
             progress: 0,
