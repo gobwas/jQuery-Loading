@@ -2,7 +2,7 @@
  * jQuery Loading - Shows loading progress animation, flexible and pretty =).
  *
  * Version: 0.2.5
- * Date: 2013-06-28 17:39:38
+ * Date: 2013-06-28 17:44:09
  *
  * Copyright 2013, Sergey Kamardin.
  *
