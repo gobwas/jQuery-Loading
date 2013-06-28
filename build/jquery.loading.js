@@ -2,7 +2,7 @@
  * jQuery Loading - Shows loading progress animation, flexible and pretty =).
  *
  * Version: 0.2.5
- * Date: 2013-06-28 17:22:23
+ * Date: 2013-06-28 17:37:56
  *
  * Copyright 2013, Sergey Kamardin.
  *
@@ -183,12 +183,11 @@
 		var createBackground = function(options, dimensions) {
 			var background = $('<div/>');
 
-			var css = {
-				position: 'absolute',
-				opacity: options.opacity
+			var hardCss = {
+				position: 'absolute'
 			};
 
-			$.extend(css, dimensions);
+			var css = $.extend({}, options.css, hardCss, dimensions);
 
 			css.background =
 				options.img ?
@@ -475,44 +474,46 @@
 
 
 (function($) {
-    "use strict";
+	"use strict";
 
-    $.fn.loading.defaults = {
-        opacity:    0.9,
-        //speedIn:    300,
-        //speedOut:   1000,
+	$.fn.loading.defaults = {
+		opacity:    0.9,
+		//speedIn:    300,
+		//speedOut:   1000,
 
-        algorithm: 'snake',
-        effect:    ['simple'],
+		algorithm: 'snake',
+		effect:    ['simple'],
 
-        spinner: {
-            width:   35,
-            height:  35,
-            matrix: {
-                x: null,
-                y: null
-            },
-            pin: {
-                width:  7,
-                height: 7,
-                margin: {
-                    top:    1,
-                    right:  1,
-                    bottom: 0,
-                    left:   0
-                }
-            },
-            interval: 100
-        },
+		spinner: {
+			width:   35,
+			height:  35,
+			matrix: {
+				x: null,
+				y: null
+			},
+			pin: {
+				width:  7,
+				height: 7,
+				margin: {
+					top:    1,
+					right:  1,
+					bottom: 0,
+					left:   0
+				}
+			},
+			interval: 100
+		},
 
-        background: {
-            color:        'white',
-            opacity:      0.8,
-            position:     '',
-            img:          null,
-            borderRadius: 1
-        }
-    };
+		background: {
+			color:        'white',
+			img:          null,
+			borderRadius: 1,
+			// raw css
+			css: {
+				opacity: 0.8
+			}
+		}
+	};
 })(jQuery);
 
 
