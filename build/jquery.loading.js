@@ -2,7 +2,7 @@
  * jQuery Loading - Shows loading progress animation, flexible and pretty =).
  *
  * Version: 0.2.5
- * Date: 2013-06-28 17:44:09
+ * Date: 2013-06-28 18:22:32
  *
  * Copyright 2013, Sergey Kamardin.
  *
@@ -184,7 +184,9 @@
 			var background = $('<div/>');
 
 			var hardCss = {
-				position: 'absolute'
+				position: 'absolute',
+				top: 0,
+				left: 0
 			};
 
 			var css = $.extend({}, options.css, hardCss, dimensions);
@@ -283,20 +285,10 @@
 
 		this.dimensions = {
 			width:  this.target.outerWidth(),
-			height: this.target.outerHeight()
+			height: this.target.outerHeight(),
+			top:    this.target.offset().top,
+			left:   this.target.offset().left
 		};
-
-		if (/^relative|absolute$/gi.test(this.target.css('position'))) {
-			$.extend(this.dimensions, {
-				top: 0,
-				left: 0
-			});
-		} else {
-			$.extend(this.dimensions, {
-				top:    this.target.offset().top,
-				left:   this.target.offset().left
-			});
-		}
 
 		this.runtime = {
 			progress: 0,
@@ -372,7 +364,7 @@
 			 * Shows loading element.
 			 */
 			show: function() {
-				this.background.append(this.spinner).appendTo(this.target);
+				this.background.append(this.spinner).appendTo(document.body);//.appendTo(this.target);
 			},
 
 			/**
