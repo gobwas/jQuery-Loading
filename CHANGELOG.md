@@ -3,7 +3,7 @@ CHANGELOG
 ### 0.2.6 (xx-xx-2013)
 ______________________
 
- + n/a
+ + Changed positioning to document.body
 
 ### 0.2.5 (12-06-2013)
 ______________________
