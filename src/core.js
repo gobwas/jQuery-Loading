@@ -56,11 +56,11 @@
 		var algorithmResolver = function(config) {
 			var name, options;
 
-			if (typeof config == 'function') {
+			if (typeof config === 'function') {
 				return config;
 			}
 
-			if (typeof config == 'string') {
+			if (typeof config === 'string') {
 				name = config;
 			} else {
 				name = config.name;
@@ -69,9 +69,7 @@
 
 			if (Loading.algorithm.hasOwnProperty(name)) {
 				var algorithm = Loading.algorithm[name];
-				if (options) {
-					algorithm.options = options;
-				}
+				options && (algorithm.options = options);
 
 				return algorithm;
 			} else {
@@ -84,25 +82,25 @@
 		 *
 		 * @private
 		 *
-		 * @param name
+		 * @param config
 		 *
 		 * @throws {Error}
 		 *
 		 * @returns {Function}
 		 */
-		var effectResolver = function(name) {
-			var effect;
+		var effectResolver = function(config) {
+			var effect, name, options;
 
-			if (typeof name == 'function') {
-				effect = name;
+			if (typeof config == 'function') {
+				effect = config;
 				effect.count = 1;
 				return effect;
 			}
 
-			if (name instanceof Array) {
+			if (config instanceof Array) {
 				var effects = [];
-				for (var x = 0; x < name.length; x++) {
-					effects.push(effectResolver(name[x]));
+				for (var x = 0; x < config.length; x++) {
+					effects.push(effectResolver(config[x]));
 				}
 
 				effect = function() {
@@ -115,9 +113,17 @@
 				return effect;
 
 			} else {
+				if (typeof config === 'string') {
+					name = config;
+				} else {
+					name = config.name;
+					config.options && (options = config.options);
+				}
+
 				if (Loading.effect.hasOwnProperty(name)) {
 					effect = Loading.effect[name];
 					effect.count = 1;
+					options && (effect.options = options);
 					return effect;
 				} else {
 					throw new Error('Effect not found: "' + name + '"');
@@ -131,13 +137,23 @@
 		 * @private
 		 *
 		 * @param options
+		 * @param dimensions
+		 *
 		 * @returns {*}
 		 */
-		var optionsNormalizer = function(options) {
+		var optionsNormalizer = function(options, dimensions) {
 			var	spinner = options.spinner,
 				matrix  = options.spinner.matrix,
 				pin     = options.spinner.pin,
 				answer  = $.extend({}, options);
+
+			if (/^[0-9]{1,3}%$/.test(spinner.width)) {
+				spinner.width = (dimensions.width / 100) * spinner.width.substr(0, spinner.width.length - 1);
+			}
+
+			if (/^[0-9]{1,3}%$/.test(spinner.height)) {
+				spinner.height = (dimensions.height / 100) * spinner.height.substr(0, spinner.height.length - 1);
+			}
 
 			if (!matrix.x || !matrix.y) {
 				answer.spinner.matrix.x = Math.floor(spinner.width / (pin.width + pin.margin.left + pin.margin.right));
@@ -198,14 +214,16 @@
 		var createPin = function(options, position) {
 			var pin = $('<div/>');
 
+			var hardCss = {
+				position:   'absolute',
+				width:      options.width,
+				height:     options.height,
+				top:        position.y * (options.height +options.margin.top + options.margin.bottom),
+				left:       position.x * (options.width +options.margin.left + options.margin.right)
+			};
+
 			pin
-				.css({
-					position:   'absolute',
-					width:      options.width,
-					height:     options.height,
-					top:        position.y * (options.height +options.margin.top + options.margin.bottom),
-					left:       position.x * (options.width +options.margin.left + options.margin.right)
-				})
+				.css($.extend(options.css, hardCss))
 				.attr({
 					'class': 'loading-pin'
 				});
@@ -265,7 +283,6 @@
 
 		this.target  = element;
 		this.id      = uniqueId(50);
-		this.options = optionsNormalizer($.extend(true, {}, $.fn.loading.defaults, options));
 
 		this.dimensions = {
 			width:  this.target.outerWidth(),
@@ -273,6 +290,8 @@
 			top:    this.target.offset().top,
 			left:   this.target.offset().left
 		};
+
+		this.options = optionsNormalizer($.extend(true, {}, $.fn.loading.defaults, options), this.dimensions);
 
 		this.runtime = {
 			progress: 0,
@@ -445,9 +464,13 @@
 	 *
 	 * @param {String} name
 	 * @param {Function} effect
+	 * @param {Object} [options]
 	 */
-	$.fn.loading.effect = function(name, effect) {
+	$.fn.loading.effect = function(name, effect, options) {
 		Loading.effect[name] = effect;
+		if (options) {
+			Loading.effect[name].options = options;
+		}
 	};
 
 })(jQuery);

@@ -1,9 +1,15 @@
 CHANGELOG
 =========
-### 0.2.7 (xx-xx-2013)
+### 0.2.8 (xx-xx-2013)
 ______________________
 
  + n/a
+
+### 0.2.7 (28-06-2013)
+______________________
+
+ + Added ability to configure effects with options
+ + Added ability to set spinner width in percents
 
 ### 0.2.6 (28-06-2013)
 ______________________
