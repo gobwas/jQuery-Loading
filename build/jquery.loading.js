@@ -1,8 +1,8 @@
 /**
  * jQuery Loading - Shows loading progress animation, flexible and pretty =).
  *
- * Version: 0.2.5
- * Date: 2013-06-28 18:22:32
+ * Version: 0.2.6
+ * Date: 2013-06-28 18:48:41
  *
  * Copyright 2013, Sergey Kamardin.
  *
@@ -77,19 +77,33 @@
 		 * Resolves which function to use as algorithm.
 		 *
 		 * @private
-		 * @param name
+		 * @param config
 		 *
 		 * @throws {Error}
 		 *
 		 * @returns {Function}
 		 */
-		var algorithmResolver = function(name) {
-			if (typeof name == 'function') {
-				return name;
+		var algorithmResolver = function(config) {
+			var name, options;
+
+			if (typeof config == 'function') {
+				return config;
+			}
+
+			if (typeof config == 'string') {
+				name = config;
+			} else {
+				name = config.name;
+				config.options && (options = config.options);
 			}
 
 			if (Loading.algorithm.hasOwnProperty(name)) {
-				return Loading.algorithm[name];
+				var algorithm = Loading.algorithm[name];
+				if (options) {
+					algorithm.options = options;
+				}
+
+				return algorithm;
 			} else {
 				throw new Error('Algorithm not found: "' + name + '"');
 			}
@@ -447,9 +461,13 @@
 	 *
 	 * @param {String} name
 	 * @param {Function} algorithm
+	 * @param {Object} [options]
 	 */
-	$.fn.loading.algorithm = function(name, algorithm) {
+	$.fn.loading.algorithm = function(name, algorithm, options) {
 		Loading.algorithm[name] = algorithm;
+		if (options) {
+			Loading.algorithm[name].options = options;
+		}
 	};
 
 	/**
@@ -473,7 +491,12 @@
 		//speedIn:    300,
 		//speedOut:   1000,
 
-		algorithm: 'snake',
+		algorithm: {
+			name: 'snake',
+			options: {
+				reverse: false
+			}
+		},
 		effect:    ['simple'],
 
 		spinner: {
@@ -502,7 +525,8 @@
 			borderRadius: 1,
 			// raw css
 			css: {
-				opacity: 0.8
+				opacity: 0.8,
+				"z-index": 9999
 			}
 		}
 	};
@@ -544,188 +568,197 @@
 
 
 (function($) {
-    "use strict";
+	"use strict";
 
-    $.fn.loading.algorithm('snake', (function()
-    {
-        var axisReverse = function (axis) {
-            return axis == 'x' ? 'y' : 'x';
-        };
+	var defaults = {
+		reverse: true
+	};
 
-        var checkIsInMatrix = function(x, y, _) {
-            var okay = true;
+	$.fn.loading.algorithm('snake', (function()
+	{
+		var axisReverse = function (axis) {
+			return axis == 'x' ? 'y' : 'x';
+		};
 
-            okay = okay && (_.matrix.x[0] <= x && x <= _.matrix.x[1]);
-            okay = okay && (_.matrix.y[0] <= y && y <= _.matrix.y[1]);
+		var checkIsInMatrix = function(x, y, _) {
+			var okay = true;
 
-            return okay;
-        };
+			okay = okay && (_.matrix.x[0] <= x && x <= _.matrix.x[1]);
+			okay = okay && (_.matrix.y[0] <= y && y <= _.matrix.y[1]);
 
-        var Path = function(_, reverseAxis, reverseSign, zeroMove) {
-            this.x = _.x;
-            this.y = _.y;
-            this.axis = reverseAxis ? axisReverse(_.axis) : _.axis;
-            this.sign = reverseSign ? -1 * _.sign : _.sign;
+			return okay;
+		};
 
-            if (!zeroMove) {
-                this[this.axis]+= this.sign;
-            }
-        };
+		var Path = function(_, reverseAxis, reverseSign, zeroMove) {
+			this.x = _.x;
+			this.y = _.y;
+			this.axis = reverseAxis ? axisReverse(_.axis) : _.axis;
+			this.sign = reverseSign ? -1 * _.sign : _.sign;
 
-        // todo refactor as hash
-        var resolvers = [
-            function(_) {
-                var path = new Path(_, false, false);
-                return checkIsInMatrix(path.x, path.y, _) ? path : false;
-            },
-            function(_) {
-                var path = new Path(_, true, true);
-                return checkIsInMatrix(path.x, path.y, _) ? path : false;
-            },
-            function(_) {
-                var path = new Path(_, true, false);
-                return checkIsInMatrix(path.x, path.y, _) ? path : false;
-            },
-            function(_) {
-                var path = new Path(_, false, true, true);
-                return checkIsInMatrix(path.x, path.y, _) ? path : false;
-            }
-        ];
+			if (!zeroMove) {
+				this[this.axis]+= this.sign;
+			}
+		};
 
-        var resolvePath = function(_) {
-            var path;
+		// todo refactor as hash
+		var resolvers = [
+			function(_) {
+				var path = new Path(_, false, false);
+				return checkIsInMatrix(path.x, path.y, _) ? path : false;
+			},
+			function(_) {
+				var path = new Path(_, true, true);
+				return checkIsInMatrix(path.x, path.y, _) ? path : false;
+			},
+			function(_) {
+				var path = new Path(_, true, false);
+				return checkIsInMatrix(path.x, path.y, _) ? path : false;
+			},
+			function(_) {
+				var path = new Path(_, false, true, true);
+				return checkIsInMatrix(path.x, path.y, _) ? path : false;
+			}
+		];
 
-            for (var x = 0; x < resolvers.length; x++) {
-                path = resolvers[x](_);
-                if (path instanceof Path) {
-                    return path;
-                }
-            }
+		var resolvePath = function(_) {
+			var path;
 
-            return false;
-        };
+			for (var x = 0; x < resolvers.length; x++) {
+				path = resolvers[x](_);
+				if (path instanceof Path) {
+					return path;
+				}
+			}
 
-        var likeStart = function(path, _) {
-            return path.x == _.start.x && path.y == _.start.y;
-        };
+			return false;
+		};
 
-        var moveMatrix = function(_, sign) {
-            var x = [_.matrix.x[0] - sign, _.matrix.x[1] + sign],
-                y = [_.matrix.y[0] - sign, _.matrix.y[1] + sign];
+		var likeStart = function(path, _) {
+			return path.x == _.start.x && path.y == _.start.y;
+		};
 
-            if ((0 <= x[0] && x[0] <= x[1]) && (0 <= y[0] && y[0] <= y[1])) {
-                _.matrix.x = x;
-                _.matrix.y = y;
+		var moveMatrix = function(_, sign) {
+			var x = [_.matrix.x[0] - sign, _.matrix.x[1] + sign],
+				y = [_.matrix.y[0] - sign, _.matrix.y[1] + sign];
 
-                return true;
-            }
+			if ((0 <= x[0] && x[0] <= x[1]) && (0 <= y[0] && y[0] <= y[1])) {
+				_.matrix.x = x;
+				_.matrix.y = y;
 
-            return false;
-        };
+				return true;
+			}
 
-        var moveStart = function(_, sign) {
-            var x,y;
+			return false;
+		};
 
-            if (sign) {
-                x = _.start.x - sign;
-                y = _.start.y - sign;
-            } else {
-                x=  _.x;
-                y = _.y;
-            }
+		var moveStart = function(_, sign) {
+			var x,y;
 
-            if (checkIsInMatrix(x,y,_)) {
-                _.start.x = x;
-                _.start.y = y;
+			if (sign) {
+				x = _.start.x - sign;
+				y = _.start.y - sign;
+			} else {
+				x=  _.x;
+				y = _.y;
+			}
 
-                return true;
-            }
+			if (checkIsInMatrix(x,y,_)) {
+				_.start.x = x;
+				_.start.y = y;
 
-            return false;
-        };
+				return true;
+			}
 
-        var countPath = function(_) {
-            var x = _.matrix.x[1] - _.matrix.x[0],
-                y = _.matrix.y[1] - _.matrix.y[0],
-                len;
+			return false;
+		};
 
-            if (x === 0 && y === 0) {
-                return 1;
-            } else if (x === 0) {
-                len = y + 1;
-            } else if (y === 0) {
-                len = x + 1;
-            } else {
-                len = 2 * (x + y);
-            }
+		var countPath = function(_) {
+			var x = _.matrix.x[1] - _.matrix.x[0],
+				y = _.matrix.y[1] - _.matrix.y[0],
+				len;
 
-            return len;
-        };
+			if (x === 0 && y === 0) {
+				return 1;
+			} else if (x === 0) {
+				len = y + 1;
+			} else if (y === 0) {
+				len = x + 1;
+			} else {
+				len = 2 * (x + y);
+			}
 
-        var reverse = function(_) {
-            _.sign *= -1;
-            _.reversed *= -1;
-        };
+			return len;
+		};
 
-        var reset = function(matrix) {
-            var _ = {
-                x: 0,
-                y: 0,
+		var reverse = function(_) {
+			_.sign *= -1;
+			_.reversed *= -1;
+		};
 
-                axis: 'x',
-                sign: 1,
-                matrix: {
-                    x: [0, matrix.x],
-                    y: [0, matrix.y]
-                },
-                path: 0,
-                reversed: -1
-            };
+		var reset = function(matrix) {
+			var _ = {
+				x: 0,
+				y: 0,
 
-            _.fullPath = countPath(_);
+				axis: 'x',
+				sign: 1,
+				matrix: {
+					x: [0, matrix.x],
+					y: [0, matrix.y]
+				},
+				path: 0,
+				reversed: -1
+			};
 
-            return _;
-        };
+			_.fullPath = countPath(_);
 
-        return function(matrix, _) {
+			return _;
+		};
 
-            if (!_) {
-                _ = reset(matrix);
+		return function Snake(matrix, _) {
 
-                _.path++;
-                return _;
-            }
+			if (!_) {
+				_ = reset(matrix);
 
-            if (_.path == _.fullPath) {
-                if (!moveMatrix(_, _.reversed)) {
-                    reverse(_);
-                    _.path = 0;
+				_.path++;
+				return _;
+			}
 
-                    //_ = reset(matrix);
-                    _.path++;
-                    return _;
-                }
+			if (_.path == _.fullPath) {
+				if (!moveMatrix(_, _.reversed)) {
 
-                _.path = 0;
-                _.fullPath = countPath(_);
-            }
+					if (Snake.options.reverse) {
+						reverse(_);
+						_.path = 0;
+					} else {
+						_ = reset(matrix);
+					}
 
-            var resolved = resolvePath(_);
+					_.path++;
 
-            if (resolved) {
-                _.x    = resolved.x;
-                _.y    = resolved.y;
-                _.axis = resolved.axis;
-                _.sign = resolved.sign;
+					return _;
+				}
 
-                _.path++;
-                return _;
-            } else {
-                throw new Error('Cant resolve path');
-            }
-        };
+				_.path = 0;
+				_.fullPath = countPath(_);
+			}
 
-    })());
+			var resolved = resolvePath(_);
+
+			if (resolved) {
+				_.x    = resolved.x;
+				_.y    = resolved.y;
+				_.axis = resolved.axis;
+				_.sign = resolved.sign;
+
+				_.path++;
+				return _;
+			} else {
+				throw new Error('Cant resolve path');
+			}
+		};
+
+	})(), defaults);
 
 }).call(this, jQuery);
 
