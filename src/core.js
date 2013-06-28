@@ -47,19 +47,33 @@
 		 * Resolves which function to use as algorithm.
 		 *
 		 * @private
-		 * @param name
+		 * @param config
 		 *
 		 * @throws {Error}
 		 *
 		 * @returns {Function}
 		 */
-		var algorithmResolver = function(name) {
-			if (typeof name == 'function') {
-				return name;
+		var algorithmResolver = function(config) {
+			var name, options;
+
+			if (typeof config == 'function') {
+				return config;
+			}
+
+			if (typeof config == 'string') {
+				name = config;
+			} else {
+				name = config.name;
+				config.options && (options = config.options);
 			}
 
 			if (Loading.algorithm.hasOwnProperty(name)) {
-				return Loading.algorithm[name];
+				var algorithm = Loading.algorithm[name];
+				if (options) {
+					algorithm.options = options;
+				}
+
+				return algorithm;
 			} else {
 				throw new Error('Algorithm not found: "' + name + '"');
 			}
@@ -417,9 +431,13 @@
 	 *
 	 * @param {String} name
 	 * @param {Function} algorithm
+	 * @param {Object} [options]
 	 */
-	$.fn.loading.algorithm = function(name, algorithm) {
+	$.fn.loading.algorithm = function(name, algorithm, options) {
 		Loading.algorithm[name] = algorithm;
+		if (options) {
+			Loading.algorithm[name].options = options;
+		}
 	};
 
 	/**

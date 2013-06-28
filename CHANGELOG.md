@@ -1,9 +1,15 @@
 CHANGELOG
 =========
-### 0.2.6 (xx-xx-2013)
+### 0.2.7 (xx-xx-2013)
+______________________
+
+ + n/a
+
+### 0.2.6 (28-06-2013)
 ______________________
 
  + Changed positioning to document.body
+ + Added ability to configure algorithm with options
 
 ### 0.2.5 (12-06-2013)
 ______________________

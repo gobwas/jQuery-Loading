@@ -6,7 +6,12 @@
 		//speedIn:    300,
 		//speedOut:   1000,
 
-		algorithm: 'snake',
+		algorithm: {
+			name: 'snake',
+			options: {
+				reverse: false
+			}
+		},
 		effect:    ['simple'],
 
 		spinner: {
@@ -35,7 +40,8 @@
 			borderRadius: 1,
 			// raw css
 			css: {
-				opacity: 0.8
+				opacity: 0.8,
+				"z-index": 9999
 			}
 		}
 	};
