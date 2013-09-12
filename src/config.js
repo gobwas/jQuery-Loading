@@ -2,7 +2,7 @@
 	"use strict";
 
 	$.fn.loading.defaults = {
-		opacity:    0.9,
+		//opacity:    0.9,
 
 		algorithm: {
 			name: 'snake',
