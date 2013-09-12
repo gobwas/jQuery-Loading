@@ -38,9 +38,9 @@
 		},
 
 		background: {
-			color:        'white',
-			img:          null,
-			borderRadius: 1,
+			//color:        'white',
+			//img:          null,
+			//borderRadius: 1,
 			// raw css
 			css: {
 				opacity: 0.8,
