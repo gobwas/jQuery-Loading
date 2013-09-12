@@ -189,16 +189,7 @@
 				left: 0
 			};
 
-			var css = $.extend({}, options.css, hardCss, dimensions);
-
-			css.background =
-				options.img ?
-					options.color + ' url('+options.img+') ' + options.position :
-					options.color;
-
-			options.borderRadius && (css['border-radius'] = options.borderRadius);
-
-			background.css(css);
+			background.css($.extend({}, options.css, hardCss, dimensions));
 
 			return background;
 		};
