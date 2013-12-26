@@ -146,7 +146,7 @@
 			return _;
 		};
 
-		return function Snake(matrix, _) {
+		function Snake(matrix, _) {
 
 			if (!_) {
 				_ = reset(matrix);
@@ -187,7 +187,9 @@
 			} else {
 				throw new Error('Cant resolve path');
 			}
-		};
+		}
+		
+		return Snake;
 
 	})(), defaults);
 
