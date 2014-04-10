@@ -464,4 +464,6 @@
 		}
 	};
 
+
+	return Loading;
 })(jQuery);

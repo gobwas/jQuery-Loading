@@ -1,7 +1,7 @@
 {
   "name": "jquery-loading",
   "title": "jQuery Loading",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "Shows loading progress animation, flexible and pretty =)",
   "repository": {
     "type": "git",
@@ -18,7 +18,9 @@
   "license": "MIT",
   "readmeFilename": "README.md",
   "devDependencies": {
-    "grunt": "~0.4.1",
+    "grunt": "*",
+    "grunt-contrib-copy": "*",
+    "grunt-contrib-clean": "*",
     "grunt-contrib-uglify": "~0.2.0",
     "grunt-contrib-concat": "~0.1.3",
     "grunt-contrib-jshint": "~0.3.0"

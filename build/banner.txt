@@ -28,3 +28,25 @@
  */
 
 
+
+!function(factory) {
+
+	var isNode, isAMD,
+		jQuery;
+
+	isNode = typeof module !== "undefined" && module.exports;
+	isAMD = typeof define === "function" && define.amd && typeof define.amd === "object";
+
+	if (isNode) {
+		jQuery = require("jquery");
+		module.exports = factory(jQuery);
+	} else if (isAMD) {
+		define(['jquery'], function(jQuery) {
+			return factory(jQuery);
+		});
+	} else {
+		factory(root.jQuery);
+	}
+
+}(function(jQuery) {
+
