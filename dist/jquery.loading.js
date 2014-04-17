@@ -1,10 +1,10 @@
 /**
  * jQuery Loading - Shows loading progress animation, flexible and pretty =).
  *
- * Version: 0.2.7
- * Date: 2013-06-28 19:51:25
+ * Version: 0.2.8
+ * Date: 2014-04-17 21:10:01
  *
- * Copyright 2013, Sergey Kamardin.
+ * Copyright 2014, Sergey Kamardin.
  *
  * Licensed under the MIT license.
  * http://www.opensource.org/licenses/mit-license.php
@@ -27,6 +27,28 @@
  *
  */
 
+
+
+!function(root, factory) {
+
+	var isNode, isAMD,
+		jQuery;
+
+	isNode = typeof module !== "undefined" && module.exports;
+	isAMD = typeof define === "function" && define.amd && typeof define.amd === "object";
+
+	if (isNode) {
+		jQuery = require("jquery");
+		module.exports = factory(jQuery);
+	} else if (isAMD) {
+		define(['jquery'], function(jQuery) {
+			return factory(jQuery);
+		});
+	} else {
+		factory(root.jQuery);
+	}
+
+}(this, function($) {
 
 (function($){
 	"use strict";
@@ -219,16 +241,7 @@
 				left: 0
 			};
 
-			var css = $.extend({}, options.css, hardCss, dimensions);
-
-			css.background =
-				options.img ?
-					options.color + ' url('+options.img+') ' + options.position :
-					options.color;
-
-			options.borderRadius && (css['border-radius'] = options.borderRadius);
-
-			background.css(css);
+			background.css($.extend({}, options.css, hardCss, dimensions));
 
 			return background;
 		};
@@ -503,14 +516,17 @@
 		}
 	};
 
+
+	return Loading;
 })(jQuery);
+
 
 
 (function($) {
 	"use strict";
 
 	$.fn.loading.defaults = {
-		opacity:    0.9,
+		//opacity:    0.9,
 
 		algorithm: {
 			name: 'snake',
@@ -546,9 +562,9 @@
 		},
 
 		background: {
-			color:        'white',
-			img:          null,
-			borderRadius: 1,
+			//color:        'white',
+			//img:          null,
+			//borderRadius: 1,
 			// raw css
 			css: {
 				opacity: 0.8,
@@ -742,7 +758,7 @@
 			return _;
 		};
 
-		return function Snake(matrix, _) {
+		function Snake(matrix, _) {
 
 			if (!_) {
 				_ = reset(matrix);
@@ -783,11 +799,14 @@
 			} else {
 				throw new Error('Cant resolve path');
 			}
-		};
+		}
+		
+		return Snake;
 
 	})(), defaults);
 
 }).call(this, jQuery);
+
 
 
 (function($) {
@@ -866,3 +885,6 @@
     }, defaults);
 
 }).call(this, jQuery);
+
+
+});
