@@ -1,28 +1,32 @@
 {
-  "name": "jquery-loading",
-  "title": "jQuery Loading",
-  "version": "0.2.8",
-  "description": "Shows loading progress animation, flexible and pretty =)",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/gobwas/jQuery-Loading.git"
-  },
-  "keywords": [
-    "jquery",
-    "loading",
-    "plugin",
-    "spinner",
-    "progress"
-  ],
-  "author": "Sergey Kamardin",
-  "license": "MIT",
-  "readmeFilename": "README.md",
-  "devDependencies": {
-    "grunt": "*",
-    "grunt-contrib-copy": "*",
-    "grunt-contrib-clean": "*",
-    "grunt-contrib-uglify": "~0.2.0",
-    "grunt-contrib-concat": "~0.1.3",
-    "grunt-contrib-jshint": "~0.3.0"
-  }
+    "name": "jquery-loading",
+    "title": "jQuery Loading",
+    "version": "0.2.8",
+    "description": "Shows loading progress animation, flexible and pretty =)",
+    "main": "dist/jquery.loading.js",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/gobwas/jQuery-Loading.git"
+    },
+    "keywords": [
+        "jquery",
+        "loading",
+        "plugin",
+        "spinner",
+        "progress"
+    ],
+    "author": "Sergey Kamardin",
+    "license": "MIT",
+    "readmeFilename": "README.md",
+    "dependencies": {
+        "jquery": "*"
+    },
+    "devDependencies": {
+        "grunt": "*",
+        "grunt-contrib-copy": "*",
+        "grunt-contrib-clean": "*",
+        "grunt-contrib-uglify": "~0.2.0",
+        "grunt-contrib-concat": "~0.1.3",
+        "grunt-contrib-jshint": "~0.3.0"
+    }
 }
