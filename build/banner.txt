@@ -29,7 +29,7 @@
 
 
 
-!function(factory) {
+!function(root, factory) {
 
 	var isNode, isAMD,
 		jQuery;
@@ -48,5 +48,5 @@
 		factory(root.jQuery);
 	}
 
-}(function($) {
+}(this, function($) {
 

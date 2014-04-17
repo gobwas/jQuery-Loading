@@ -2,7 +2,7 @@
  * jQuery Loading - Shows loading progress animation, flexible and pretty =).
  *
  * Version: 0.2.8
- * Date: 2014-04-17 20:44:48
+ * Date: 2014-04-17 20:56:07
  *
  * Copyright 2014, Sergey Kamardin.
  *
@@ -29,7 +29,7 @@
 
 
 
-!function(factory) {
+!function(root, factory) {
 
 	var isNode, isAMD,
 		jQuery;
@@ -48,7 +48,7 @@
 		factory(root.jQuery);
 	}
 
-}(function($) {
+}(this, function($) {
 
 (function($){
 	"use strict";
